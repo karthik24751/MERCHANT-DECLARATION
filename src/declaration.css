@@ -77,23 +77,22 @@
 
 /* Checkboxes */
 .checkbox-box {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 14px;
   height: 14px;
   border: 1px solid black;
   margin-right: 5px;
-  position: relative;
   vertical-align: middle;
 }
 
 .checkbox-box.checked::after {
   content: '✓';
-  position: absolute;
-  top: -12px;
-  left: 2px;
-  font-size: 28px;
+  font-size: 14px;
   font-weight: bold;
   color: black;
+  line-height: 1;
 }
 
 /* Signature & Images */
