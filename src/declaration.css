@@ -94,22 +94,56 @@
   line-height: 1;
 }
 
-/* Signature & Images */
+.sign-seal-container {
+  position: relative;
+  display: inline-block;
+  min-height: 80px;
+  margin-bottom: 10px;
+}
+
 .signature-img {
-  max-width: 120px;
-  max-height: 40px;
+  max-width: 200px;
+  max-height: 80px;
   object-fit: contain;
+  position: relative;
+  z-index: 1;
 }
 
 .seal-img {
-  max-width: 80px;
-  max-height: 40px;
+  position: absolute;
+  bottom: -10px;
+  right: -20px;
+  max-width: 120px;
+  max-height: 80px;
   object-fit: contain;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.profile-container {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  height: 130px;
 }
 
 .profile-img {
-  width: 110px;
-  height: 130px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   border: 1px solid #ccc;
+}
+
+.cross-signature {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translate(-50%, 0) rotate(-15deg);
+  max-width: 160px;
+  max-height: 100px;
+  z-index: 10;
+  opacity: 0.9;
+  pointer-events: none;
 }

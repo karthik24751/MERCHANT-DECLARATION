@@ -14,7 +14,9 @@
     "lucide-react": "^1.28.0",
     "pdf-lib": "^1.17.1",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-image-crop": "^11.1.2",
+    "react-rnd": "^10.5.3"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

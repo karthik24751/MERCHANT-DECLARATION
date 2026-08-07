@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { Download, RefreshCw, Upload, Image as ImageIcon } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { DeclarationTemplate } from './DeclarationTemplate';
+import { ImageEditorModal } from './components/ImageEditorModal';
 import './index.css';
 
 const initialFormState = {
@@ -62,6 +63,10 @@ const initialFormState = {
 function App() {
   const [formData, setFormData] = useLocalStorage('merchant-declaration-form', initialFormState);
   const pdfRef = useRef(null);
+  
+  // Image Editor State
+  const [editingImageFile, setEditingImageFile] = useState(null);
+  const [editingImageField, setEditingImageField] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,45 +76,65 @@ function App() {
     }));
   };
 
+  const processBasicImage = (file, fieldName) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const max_size = 800;
+
+        if (width > height) {
+          if (width > max_size) {
+            height *= max_size / width;
+            width = max_size;
+          }
+        } else {
+          if (height > max_size) {
+            width *= max_size / height;
+            height = max_size;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: dataUrl
+        }));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleImageUpload = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const max_size = 800;
-
-          if (width > height) {
-            if (width > max_size) {
-              height *= max_size / width;
-              width = max_size;
-            }
-          } else {
-            if (height > max_size) {
-              width *= max_size / height;
-              height = max_size;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          setFormData(prev => ({
-            ...prev,
-            [fieldName]: dataUrl
-          }));
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
+      if (['signature1', 'seal1', 'signatureFinal', 'sealFinal'].includes(fieldName)) {
+        // Open Advanced Image Editor for Signatures and Seals
+        setEditingImageFile(file);
+        setEditingImageField(fieldName);
+      } else {
+        // Basic processing for normal pictures (like Authorized Signatory Picture)
+        processBasicImage(file, fieldName);
+      }
     }
+  };
+
+  const handleEditorSave = (dataUrl) => {
+    setFormData(prev => ({
+      ...prev,
+      [editingImageField]: dataUrl
+    }));
+    setEditingImageFile(null);
+    setEditingImageField(null);
   };
 
   const handleReset = () => {
@@ -139,6 +164,17 @@ function App() {
 
   return (
     <div className="container">
+      {editingImageFile && (
+        <ImageEditorModal 
+          file={editingImageFile} 
+          onSave={handleEditorSave} 
+          onClose={() => {
+            setEditingImageFile(null);
+            setEditingImageField(null);
+          }} 
+        />
+      )}
+
       <h1>PhonePe Merchant Declaration</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
         Fill out the details below. The system automatically saves your progress.
@@ -249,6 +285,9 @@ function App() {
       {/* SECTION 4 */}
       <div className="card">
         <h2>Section 4: Declaration Signatures</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+          Our AI will automatically extract the signature/seal, remove the background, and make it transparent.
+        </p>
         <div className="grid-2 mt-4">
           <div className="form-group">
             <label>Upload Signature</label>
@@ -256,7 +295,7 @@ function App() {
               <Upload size={24} color="var(--primary-color)" />
               <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Click to upload signature</p>
               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'signature1')} />
-              {formData.signature1 && <img src={formData.signature1} alt="Signature 1" className="preview-image" />}
+              {formData.signature1 && <img src={formData.signature1} alt="Signature 1" className="preview-image" style={{ background: '#f8fafc' }} />}
             </div>
           </div>
           <div className="form-group">
@@ -265,7 +304,7 @@ function App() {
               <Upload size={24} color="var(--primary-color)" />
               <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Click to upload seal</p>
               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'seal1')} />
-              {formData.seal1 && <img src={formData.seal1} alt="Seal 1" className="preview-image" />}
+              {formData.seal1 && <img src={formData.seal1} alt="Seal 1" className="preview-image" style={{ background: '#f8fafc' }} />}
             </div>
           </div>
         </div>
@@ -355,7 +394,7 @@ function App() {
             <div className="file-upload-wrapper">
               <Upload size={24} color="var(--primary-color)" />
               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'signatureFinal')} />
-              {formData.signatureFinal && <img src={formData.signatureFinal} alt="Final Sign" className="preview-image" />}
+              {formData.signatureFinal && <img src={formData.signatureFinal} alt="Final Sign" className="preview-image" style={{ background: '#f8fafc' }} />}
             </div>
           </div>
           <div className="form-group">
@@ -363,11 +402,14 @@ function App() {
             <div className="file-upload-wrapper">
               <Upload size={24} color="var(--primary-color)" />
               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'sealFinal')} />
-              {formData.sealFinal && <img src={formData.sealFinal} alt="Final Seal" className="preview-image" />}
+              {formData.sealFinal && <img src={formData.sealFinal} alt="Final Seal" className="preview-image" style={{ background: '#f8fafc' }} />}
             </div>
           </div>
           <div className="form-group">
             <label>Picture of Authorized Signatory (Countersign)</label>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              Final signature will automatically be placed over this picture.
+            </p>
             <div className="file-upload-wrapper">
               <ImageIcon size={24} color="var(--primary-color)" />
               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'picture')} />

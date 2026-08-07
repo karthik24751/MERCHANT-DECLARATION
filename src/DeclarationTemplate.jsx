@@ -85,9 +85,11 @@ export const DeclarationTemplate = React.forwardRef(({ data }, ref) => {
           <tbody>
             <tr>
               <td style={{ width: '30%', fontWeight: 'bold' }}>Signature with seal:</td>
-              <td style={{ textAlign: 'center', height: '60px' }}>
-                 {data.signature1 && <img src={data.signature1} className="signature-img" alt="sig"/>}
-                 {data.seal1 && <img src={data.seal1} className="seal-img" alt="seal"/>}
+              <td style={{ textAlign: 'center', padding: '10px' }}>
+                 <div className="sign-seal-container">
+                   {data.signature1 && <img src={data.signature1} className="signature-img" alt="sig"/>}
+                   {data.seal1 && <img src={data.seal1} className="seal-img" alt="seal"/>}
+                 </div>
               </td>
             </tr>
             <tr>
@@ -176,9 +178,9 @@ export const DeclarationTemplate = React.forwardRef(({ data }, ref) => {
               <td style={{ width: '50%', padding: '15px' }}>
                 <p>Yours faithfully,</p>
                 <p>For and behalf of the Merchant</p>
-                <div style={{ height: '60px', marginTop: '10px' }}>
-                  {data.signatureFinal && <img src={data.signatureFinal} className="signature-img" style={{ float: 'left' }} alt="sig" />}
-                  {data.sealFinal && <img src={data.sealFinal} className="seal-img" style={{ float: 'left', marginLeft: '10px' }} alt="seal" />}
+                <div className="sign-seal-container">
+                  {data.signatureFinal && <img src={data.signatureFinal} className="signature-img" alt="sig" />}
+                  {data.sealFinal && <img src={data.sealFinal} className="seal-img" alt="seal" />}
                 </div>
                 <p>(Signature with Seal)</p>
                 <p>Designation: {data.designation}</p>
@@ -186,7 +188,12 @@ export const DeclarationTemplate = React.forwardRef(({ data }, ref) => {
                 <p>Place: {data.place}</p>
               </td>
               <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'middle' }}>
-                {data.picture && <img src={data.picture} className="profile-img" alt="profile" />}
+                <div className="profile-container">
+                  {data.picture && <img src={data.picture} className="profile-img" alt="profile" />}
+                  {data.picture && data.signatureFinal && (
+                    <img src={data.signatureFinal} className="cross-signature" alt="cross-sign" />
+                  )}
+                </div>
                 <p style={{ marginTop: '10px', fontSize: '10px' }}>Picture of the Authorised Signatory<br/>(Countersign with face visible)</p>
               </td>
             </tr>
