@@ -59,7 +59,8 @@ export const ImageEditorModal = ({ file, onSave, onClose }) => {
       formData.append('noise_reduction', currentSettings.noise_reduction);
       formData.append('use_rembg', currentSettings.use_rembg);
 
-      const response = await fetch('http://localhost:8000/process-signature', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/process-signature`, {
         method: 'POST',
         body: formData,
       });
