@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import { Download, RefreshCw, Upload, Image as ImageIcon } from 'lucide-react';
+import { Download, RefreshCw, Upload, Image as ImageIcon, Camera } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { DeclarationTemplate } from './DeclarationTemplate';
 import { ImageEditorModal } from './components/ImageEditorModal';
+import { CameraModal } from './components/CameraModal';
 import './index.css';
 
 const initialFormState = {
@@ -67,6 +68,7 @@ function App() {
   // Image Editor State
   const [editingImageFile, setEditingImageFile] = useState(null);
   const [editingImageField, setEditingImageField] = useState(null);
+  const [cameraField, setCameraField] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -172,6 +174,21 @@ function App() {
             setEditingImageFile(null);
             setEditingImageField(null);
           }} 
+        />
+      )}
+
+      {cameraField && (
+        <CameraModal 
+          onCapture={(file) => {
+            if (['signature1', 'seal1', 'signatureFinal', 'sealFinal'].includes(cameraField)) {
+              setEditingImageFile(file);
+              setEditingImageField(cameraField);
+            } else {
+              processBasicImage(file, cameraField);
+            }
+            setCameraField(null);
+          }} 
+          onClose={() => setCameraField(null)} 
         />
       )}
 
@@ -291,20 +308,28 @@ function App() {
         <div className="grid-2 mt-4">
           <div className="form-group">
             <label>Upload Signature</label>
-            <div className="file-upload-wrapper">
-              <Upload size={24} color="var(--primary-color)" />
-              <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Click to upload signature</p>
-              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'signature1')} />
-              {formData.signature1 && <img src={formData.signature1} alt="Signature 1" className="preview-image" style={{ background: '#f8fafc' }} />}
+            <div className="file-upload-wrapper" style={{ cursor: 'default', padding: '1.5rem 1rem' }}>
+              <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', overflow: 'hidden' }}>
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}><Upload size={18} /> Upload Image</button>
+                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'signature1')} style={{position: 'absolute', top: 0, left: 0, opacity: 0, cursor: 'pointer', height: '100%', width: '100%'}} />
+                </div>
+                <button className="btn btn-secondary" onClick={() => setCameraField('signature1')}><Camera size={18} /> Take Photo</button>
+              </div>
+              {formData.signature1 && <img src={formData.signature1} alt="Signature 1" className="preview-image" style={{ background: '#f8fafc', position: 'relative', zIndex: 2 }} />}
             </div>
           </div>
           <div className="form-group">
             <label>Upload Company Seal (Optional)</label>
-            <div className="file-upload-wrapper">
-              <Upload size={24} color="var(--primary-color)" />
-              <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Click to upload seal</p>
-              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'seal1')} />
-              {formData.seal1 && <img src={formData.seal1} alt="Seal 1" className="preview-image" style={{ background: '#f8fafc' }} />}
+            <div className="file-upload-wrapper" style={{ cursor: 'default', padding: '1.5rem 1rem' }}>
+              <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', overflow: 'hidden' }}>
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}><Upload size={18} /> Upload Image</button>
+                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'seal1')} style={{position: 'absolute', top: 0, left: 0, opacity: 0, cursor: 'pointer', height: '100%', width: '100%'}} />
+                </div>
+                <button className="btn btn-secondary" onClick={() => setCameraField('seal1')}><Camera size={18} /> Take Photo</button>
+              </div>
+              {formData.seal1 && <img src={formData.seal1} alt="Seal 1" className="preview-image" style={{ background: '#f8fafc', position: 'relative', zIndex: 2 }} />}
             </div>
           </div>
         </div>
@@ -391,18 +416,28 @@ function App() {
         <div className="grid-2 mt-4">
           <div className="form-group">
             <label>Final Signature</label>
-            <div className="file-upload-wrapper">
-              <Upload size={24} color="var(--primary-color)" />
-              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'signatureFinal')} />
-              {formData.signatureFinal && <img src={formData.signatureFinal} alt="Final Sign" className="preview-image" style={{ background: '#f8fafc' }} />}
+            <div className="file-upload-wrapper" style={{ cursor: 'default', padding: '1.5rem 1rem' }}>
+              <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', overflow: 'hidden' }}>
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}><Upload size={18} /> Upload Image</button>
+                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'signatureFinal')} style={{position: 'absolute', top: 0, left: 0, opacity: 0, cursor: 'pointer', height: '100%', width: '100%'}} />
+                </div>
+                <button className="btn btn-secondary" onClick={() => setCameraField('signatureFinal')}><Camera size={18} /> Take Photo</button>
+              </div>
+              {formData.signatureFinal && <img src={formData.signatureFinal} alt="Final Sign" className="preview-image" style={{ background: '#f8fafc', position: 'relative', zIndex: 2 }} />}
             </div>
           </div>
           <div className="form-group">
             <label>Final Seal (Optional)</label>
-            <div className="file-upload-wrapper">
-              <Upload size={24} color="var(--primary-color)" />
-              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'sealFinal')} />
-              {formData.sealFinal && <img src={formData.sealFinal} alt="Final Seal" className="preview-image" style={{ background: '#f8fafc' }} />}
+            <div className="file-upload-wrapper" style={{ cursor: 'default', padding: '1.5rem 1rem' }}>
+              <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', overflow: 'hidden' }}>
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}><Upload size={18} /> Upload Image</button>
+                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'sealFinal')} style={{position: 'absolute', top: 0, left: 0, opacity: 0, cursor: 'pointer', height: '100%', width: '100%'}} />
+                </div>
+                <button className="btn btn-secondary" onClick={() => setCameraField('sealFinal')}><Camera size={18} /> Take Photo</button>
+              </div>
+              {formData.sealFinal && <img src={formData.sealFinal} alt="Final Seal" className="preview-image" style={{ background: '#f8fafc', position: 'relative', zIndex: 2 }} />}
             </div>
           </div>
           <div className="form-group">
@@ -410,10 +445,15 @@ function App() {
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               Final signature will automatically be placed over this picture.
             </p>
-            <div className="file-upload-wrapper">
-              <ImageIcon size={24} color="var(--primary-color)" />
-              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'picture')} />
-              {formData.picture && <img src={formData.picture} alt="Picture" className="preview-image" />}
+            <div className="file-upload-wrapper" style={{ cursor: 'default', padding: '1.5rem 1rem' }}>
+              <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', overflow: 'hidden' }}>
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}><Upload size={18} /> Upload Image</button>
+                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'picture')} style={{position: 'absolute', top: 0, left: 0, opacity: 0, cursor: 'pointer', height: '100%', width: '100%'}} />
+                </div>
+                <button className="btn btn-secondary" onClick={() => setCameraField('picture')}><Camera size={18} /> Take Photo</button>
+              </div>
+              {formData.picture && <img src={formData.picture} alt="Picture" className="preview-image" style={{ position: 'relative', zIndex: 2 }} />}
             </div>
           </div>
         </div>
